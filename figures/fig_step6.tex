@@ -1,0 +1,33 @@
+\begin{tikzpicture}[x=1cm,y=1cm,lab/.style={fmlabel}]
+\begin{scope}[xshift=0cm]
+  \node[fmnote,font=\small\bfseries] at (2.2,5.3) {After one optimization round};
+  \node[fmstate] (l0) at (0.0,4.3) {$0$};
+  \node[fmstate] (l1) at (0.0,2.3) {$1$};
+  \node[fmstate] (l3) at (4.1,2.3) {$3$};
+  \node[fmaccept] (l4) at (0.0,0.0) {$4$};
+  \draw[fmedge] (-1.0,4.3) -- (l0);
+  \draw[fmedge] (l0) -- node[lab,right] {$\neg p\;/\;\mathsf{rst}(x),\mathsf{rst}(y)$} (l1);
+  \draw[fmedge] (l1) edge[loop left,looseness=5] node[lab,left] {$x\le5,\;\neg p$} (l1);
+  \draw[fmedge] (l1) -- node[lab,above] {$2\le x\le5,\;\neg p$} (l3);
+  \draw[fmedge] (l1) -- node[lab,left] {$2\le x\le5,\;p$} (l4);
+  \draw[fmedge] (l3) edge[loop above,looseness=5] node[lab,above] {$x\le5,\;\neg p$} (l3);
+  \draw[fmedge] (l3) -- node[lab,pos=.55,below right] {$x\le5,\;p$} (l4);
+  \draw[fmedge] (l4) edge[loop right] node[lab,right] {$\top$} (l4);
+\end{scope}
+
+\begin{scope}[xshift=8.5cm]
+  \node[fmnote,font=\small\bfseries] at (2.2,5.3) {Final TBA};
+  \node[fmstate] (r0) at (0.0,4.3) {$0$};
+  \node[fmstate,minimum size=11mm] (r1) at (0.0,2.3) {$\begin{array}{c}1\\[-1mm]x\le5\end{array}$};
+  \node[fmstate,minimum size=11mm] (r3) at (4.1,2.3) {$\begin{array}{c}3\\[-1mm]x\le5\end{array}$};
+  \node[fmaccept] (r4) at (0.0,0.0) {$4$};
+  \draw[fmedge] (-1.0,4.3) -- (r0);
+  \draw[fmedge] (r0) -- node[lab,right] {$\neg p\;/\;\mathsf{rst}(x)$} (r1);
+  \draw[fmedge] (r1) edge[loop left,looseness=5] node[lab,left] {$x\le5,\;\neg p$} (r1);
+  \draw[fmedge] (r1) -- node[lab,above] {$2\le x\le5,\;\neg p$} (r3);
+  \draw[fmedge] (r1) -- node[lab,left] {$2\le x\le5,\;p$} (r4);
+  \draw[fmedge] (r3) edge[loop above,looseness=5] node[lab,above] {$x\le5,\;\neg p$} (r3);
+  \draw[fmedge] (r3) -- node[lab,pos=.55,below right] {$x\le5,\;p$} (r4);
+  \draw[fmedge] (r4) edge[loop right] node[lab,right] {$\top$} (r4);
+\end{scope}
+\end{tikzpicture}

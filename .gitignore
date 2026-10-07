@@ -1,0 +1,33 @@
+# TeX auxiliary/build files; keep the final article and supplement PDFs tracked.
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+build-*.txt
+p2*.png
+s2*.png
+supp-page*.png
+
+# Coq/Rocq compiled artifacts and caches.
+*.vo
+*.vos
+*.vok
+*.glob
+*.lia.cache
+*.nia.cache
+
+# OCaml build products.
+*.cmi
+*.cmo
+*.cmx
+*.cmxa
+*.cma
+*.o
+*.a
+*.exe
+_build/

@@ -23,16 +23,10 @@ try {
         }
     }
 
-    # Create the main labels first, then the supplement imports them; the last
-    # main passes import the supplement labels through xr.
+    # The reproduction and artifact details are part of the 20-page article.
     $latexArgs = @('-interaction=nonstopmode', '-halt-on-error', '-file-line-error')
     Invoke-CheckedTool 'pdflatex' ($latexArgs + 'paper2.tex')
     Invoke-CheckedTool 'bibtex' @('paper2')
-    Invoke-CheckedTool 'pdflatex' ($latexArgs + 'paper2.tex')
-    Invoke-CheckedTool 'pdflatex' ($latexArgs + 'paper2_supp.tex')
-    Invoke-CheckedTool 'bibtex' @('paper2_supp')
-    Invoke-CheckedTool 'pdflatex' ($latexArgs + 'paper2_supp.tex')
-    Invoke-CheckedTool 'pdflatex' ($latexArgs + 'paper2_supp.tex')
     Invoke-CheckedTool 'pdflatex' ($latexArgs + 'paper2.tex')
     Invoke-CheckedTool 'pdflatex' ($latexArgs + 'paper2.tex')
 
@@ -53,9 +47,9 @@ try {
         $pageLine = $info | Where-Object { $_.ToString() -match '^Pages:\s+' } | Select-Object -First 1
         if ($pageLine -match '^Pages:\s+(\d+)') {
             $pages = [int]$Matches[1]
-            Write-Host "paper2.pdf: $pages pages (20-page maximum)."
-            if ($pages -gt 20) {
-                throw "paper2.pdf exceeds the 20-page limit ($pages pages)."
+            Write-Host "paper2.pdf: $pages pages (20-page target)."
+            if ($pages -ne 20) {
+                throw "paper2.pdf must be exactly 20 pages ($pages pages)."
             }
         }
     }

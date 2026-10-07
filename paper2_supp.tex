@@ -62,44 +62,11 @@
 \address[1]{Higher Colleges of Technology, Sharjah, United Arab Emirates (e-mail: efares@hct.ac.ae, halaqrabi@hct.ac.ae, asalami@hct.ac.ae)}
 \address[2]{IRIT, UPS, Universit\'e de Toulouse, France (e-mail: bodeveix@irit.fr)}
 \begin{abstract}
-This supplement gives detailed definitions and proof arguments for the verified TBA optimization and UPPAAL export passes, the full benchmark data and formula list, additional implementation checks, and the system models used in the UPPAAL case study. The Coq preservation results quantify over arbitrary TBAs; measurements are limited to benchmark automata recorded in the project.
+This supplement records extended implementation and reproduction details for the verified TBA optimization and UPPAAL export pipeline. The Coq preservation results quantify over arbitrary TBAs; measurements are limited to benchmark automata recorded in the project.
 \end{abstract}
 \titlepgskip=-15pt
 \maketitle
-\input{supp_passes}
 
-\section{Evaluation Artifacts and Extended Measurements}
-\label{sec:supp-evaluation}
-This section records benchmark rows and input formulas used in the article. Source tables and raw data are included under \texttt{evaluation/}; the values below are tracked artifacts. The complete project and reproduction instructions are at:\par\noindent
-\url{https://github.com/efares1/}\\
-\url{verified-tba-optimization-uppaal}.
-
-\subsection{Benchmark formulas}
-\label{sec:supp-formulas}
-Table~\ref{tab:formulas} lists the 31 configurations. R$n$ is the conjunction of $n$ independent bounded responses, and N$n$ is the nested bounded-eventuality family. These formula-generated inputs support tool evaluation; they do not define the domain of the generic Coq theorems.
-\input{evaluation/formulas_table}
-
-\subsection{Complete structural evaluation}
-\label{sec:supp-results}
-The full table reports the upstream Spot automaton, optimized automaton, UPPAAL export, symbolic representation, wall-clock times, CASAAL sizes, and language-comparison outcome. For comparisons, \texttt{exp} means an inclusion was established on the exported automaton; \texttt{cmp} means an inclusion was established only on the compiled automaton before post-processing; \texttt{?} means no conclusion within limits; \texttt{--} means the formulas are not equivalent because hatted operators have no CASAAL counterpart. Equal sizes do not establish language equality.
-\input{evaluation/results_table}
-
-\subsection{Scaling and weak-until ablation}
-\label{sec:supp-scaling}
-The scaling table reports stage times, min/max over five runs, peak memory, and exported transition counts for the scalable families. The second table compares the tracked weak-until default with the measurement-only \texttt{-noweak} option. These results describe Spot 2.16 and the current configuration; they are not asymptotic bounds.
-\input{evaluation/scaling_table}
-\input{evaluation/weak_table}
-
-\subsection{Translation validation and language comparisons}
-\label{sec:supp-validation}
-The evaluation repository includes scripts and raw TSV results for checks summarized in Section~\ref{main-sec:evaluation}:
-\begin{itemize}[leftmargin=*]
-\item \textbf{Spot-output cross-check.} An independent translator (ltl2ba 1.3) and Spot's \texttt{autfilt} check the returned automaton against the clocked-LTL input. Both inclusions conclude on 25 configurations; on R6--R8 and N6--N8, ltl2ba does not finish within 300 seconds. This is benchmark translation validation, not a verified replacement for the LTL-to-B\"uchi translator.
-\item \textbf{Interface check.} With \texttt{-check}, Spot parses the formula from the ordinary printer and a second prefix printer, and \texttt{autfilt --equivalent-to} compares the automaton read by the tool with Spot's raw output. Checks pass on all 31 configurations. A common error in both printers or Spot's parser is not ruled out.
-\item \textbf{CASAAL products.} TChecker 0.8 checks products of the two tool automata for a formula and its negation, with event exclusivity, increasing timestamps, and divergent time enforced by additional processes. Its conversion script is unverified. The 29 comparable configurations yield 17 conclusions on exported automata, 3 on the pre-optimization compiled automaton only, and 9 inconclusive cases.
-\item \textbf{Random formulas.} The repository records 100 generated formulas of depth at most three over three propositions. With a 120-second bound per product check, comparison products are empty for 95 formulas; for four others, checks that finish report emptiness. One remaining formula produces a nonempty product related to CASAAL's printed acceptance marking for an unfulfilled eventuality, as documented in \texttt{evaluation/README.md}.
-\item \textbf{Implementation checks.} Eighteen finite-word simulator checks exercise strict and non-strict boundaries and overlapping activations. They pass and validate selected output behaviors; they do not replace the mechanized proof.
-\end{itemize}
 
 \section{Implementation and Reproduction Details}
 \label{sec:supp-implementation}
@@ -109,53 +76,9 @@ The data correspond to five runs per configuration, with a 300-second per-run li
 
 The Coq transformations are verified under existential initial clock values. The zero-initialization check used by the formula-generated workflow is not a generic input-format guarantee. Using an arbitrary external TBA requires a separate argument that its initialization and printed representation match the intended UPPAAL semantics.
 
-\section{UPPAAL Case-Study Models}
-\label{sec:supp-case}
-This section records the four small system models behind the demonstration in Section~\ref{main-sec:evaluation}. Model files, queries, and recorded outputs are in \texttt{evaluation/case\_study/}. Edges below use the form: source $\to$ target: guard, event / resets; an omitted guard is true.
+\section{UPPAAL Case-Study Artifacts}
+The complete property automata, system model descriptions, queries, and recorded UPPAAL results appear in Section~\ref{main-sec:evaluation} of the article. The corresponding UPPAAL models, query files, and outputs are included under \texttt{evaluation/case\_study/} in the project repository.
 
-\subsection{Property automata}
-For sporadicity, the violation formula $\Diamond(e\wedge\hEventually_{<2}e)$ is compiled into locations $L0$ (initial), $A2$ (accepting, invariant $x_0\le2$), and accepting sink $A4$, with one clock:
-\begin{itemize}[leftmargin=*,itemsep=0pt]
-\item $L0\to L0$: every event / $x_0$; \quad $L0\to A2$: $e$ / $x_0$;
-\item $A2\to A2$: $x_0<2$, $\mathit{other}$; \quad $A2\to A4$: $x_0<2$, $e$;
-\item $A4\to A4$: every event.
-\end{itemize}
-The automaton guesses one $e$ and reaches $A4$ when a second follows less than two time units later. The bounded accepting location cannot be occupied forever on a time-divergent word, so acceptance entails a visit to the violation sink.
-
-For bounded response, the violation formula is $\Diamond(p\wedge\hAlways_{\le5}\neg q)$, with locations $L0$ (initial), $A2$ (accepting), and $A4$ (accepting sink):
-\begin{itemize}[leftmargin=*,itemsep=0pt]
-\item $L0\to L0$: every event; \quad $L0\to A2$: $p$ / $x_0$;
-\item $A2\to A2$: $p$ or $\mathit{other}$; \quad $A2\to A4$: $x_0>5$, every event;
-\item $A4\to A4$: every event.
-\end{itemize}
-A run that remains in $A2$ forever corresponds to a request that is never answered. On a word with divergent time and infinitely many events, an event eventually enables the transition to $A4$.
-
-\subsection{System models and results}
-Every system has a clock $z$, reset on every emission and tested by $z>0$ so event times strictly increase, and a clock $y$ for its timing parameter.
-\begin{itemize}[leftmargin=*,itemsep=0pt]
-\item \emph{Sporadic emitter.} A single location $S$ has $S\to S$: $y\ge k\land z>0$, $e$ / $y,z$, and $S\to S$: $z>0$, $\mathit{other}$ / $z$. It satisfies the requirement for $k=2$ and violates it for $k=1$.
-\item \emph{Controller.} Locations are $\mathit{Idle}$ (initial) and $\mathit{Busy}$, with invariant $y\le d$. The transition $\mathit{Idle}\to\mathit{Busy}$ emits $p$ when $z>0$ and resets $y,z$; $\mathit{Idle}$ can emit \texttt{other} when $z>0$ and reset $z$. In $\mathit{Busy}$, \texttt{other} is emitted under $z>0\land y<d$, resetting $z$, and $q$ is emitted under $z>0\land y\ge1$, resetting $z$ and returning to $\mathit{Idle}$. It satisfies bounded response for $d=4$ and violates it for $d=6$.
-\end{itemize}
-The query is \texttt{E<> P.A4}. Table~\ref{tab:case} records UPPAAL 5.0.0 results. The system-alone deadlock check composes each system with a receiver of every channel, without the property automaton.
-\begin{table}[t]
-\centering
-\caption{Case study with UPPAAL 5.0.0. Reachability is \texttt{E<> P.A4}; no deadlock is \texttt{A[] not deadlock} on the system alone.}
-\label{tab:case}
-\footnotesize
-\begin{tabular}{@{}lccc@{}}
-\toprule
-System & Reachability & Diagnostic trace & No deadlock\\
-\midrule
-Emitter, $k=2$ & no & --- & yes\\
-Emitter, $k=1$ & yes & $(e,1)(e,2)$ & yes\\
-Controller, $d=4$ & no & --- & yes\\
-Controller, $d=6$ & yes & $(p,0.5)(q,6)$ & yes\\
-\bottomrule
-\end{tabular}
-\end{table}
-A controller variant without guard $y<d$ can emit \texttt{other} at $y=d$, after which the $z>0$ test prevents another event while the invariant prevents time advancing. UPPAAL's system-alone \texttt{A[] not deadlock} query detects this timelock; packaged models use the corrected guard.
-
-\bibliography{references}
 \EOD
 \end{document}
 

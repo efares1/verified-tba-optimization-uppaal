@@ -9,9 +9,11 @@
 *.synctex.gz
 *.toc
 build-*.txt
+build_run.txt
 p2*.png
 s2*.png
 supp-page*.png
+/review/
 
 # Coq/Rocq compiled artifacts and caches.
 *.vo

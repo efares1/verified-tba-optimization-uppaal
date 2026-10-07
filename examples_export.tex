@@ -1,0 +1,111 @@
+\subsection{Generated automata with disjunctive invariants}
+The following two tracked inputs show how the export handles disjunctive
+invariants in automata produced by the integrated tool. They illustrate the
+verified post-processing and export layer; the upstream translation is not
+part of the generic preservation claims in this paper.
+
+\subsubsection{Nested upper-bounded Until}
+For
+\[
+  \Diamond_{\le5}(p\,\mathsf U_{\le2}\,q),
+\]
+the optimized automaton has a disjunctive invariant at location~4,
+$x_{u1}\le2\lor x_{u0}\le5$. Every edge entering that location resets
+$x_{u1}$. If the entry value of $x_{u0}$ is $v$, the two invariant clauses
+permit delays of $2$ and $5-v$. The export splits location~4 into a copy with
+invariant $x_{u1}\le2$ and a copy with invariant $x_{u0}\le5$. Their entry
+conditions are respectively $x_{u0}\ge3$ and $x_{u0}\le3$: each selects a
+copy that admits a maximal delay. Both are enabled at the tie $x_{u0}=3$.
+Incoming transitions, including the self-loop, are replicated to both
+copies, and outgoing transitions are replicated from each.
+
+Figure~\ref{fig:ex1-invariants} shows the generated automaton before and after
+the split. For readability, the drawing omits guards implied by source
+invariants and edges subsumed by another edge with the same target, event,
+and resets; the exported automaton retains them. The output has 23 explicit
+transitions with \texttt{-init} (25 without it). This example uses Spot
+options \texttt{-B -D}; dead resets have already been removed.
+
+\begin{figure*}[!tp]
+\centering
+\subfloat[Before invariant elimination.\label{fig:ex1-with-disj}]{
+  \input{figures/fig_ex1_with_disj}}
+
+\medskip
+
+\subfloat[After invariant elimination.\label{fig:ex1-no-disj}]{
+  \input{figures/fig_ex1_no_disj}}
+\caption{Generated automaton for $\Diamond_{\le5}(p\,\mathsf U_{\le2}\,q)$.
+Location invariants appear inside the nodes; edge labels are ``guard, event /
+resets.'' A comma-separated event list denotes separate transitions, and
+$\mathit{other}$ denotes any event other than $p$ and $q$. The double circle
+marks the accepting location. Both diagrams are after the initial
+\texttt{\_init\_} transition at time zero. Location~5 is created by the
+split. Guards implied by source invariants and subsumed edges are omitted from
+the drawing.}
+\label{fig:ex1-invariants}
+\end{figure*}
+At the timed-word level, the accepted behavior has a direct witness: either
+$q$ occurs at a position $k$ with $t_k\le5$, or a sequence satisfying $p$
+starts at some $j$ with $t_j\le5$ and reaches $q$ at $k$ with
+$t_k-t_j\le2$. The split preserves these same choices at location~4 while
+making each location invariant conjunctive.
+
+\subsubsection{Timed Release obligation inside Until}
+The second input is
+\[
+  \Diamond_{\le5}\bigl((\Box_{\le3}(p\lor q))\,\mathsf U_{\le2}\,q\bigr).
+\]
+Its optimized automaton has seven locations before export and contains a
+disjunctive invariant (Fig.~\ref{fig:ex2-disj}). The three distinct primitive
+timed subformulas use clocks $x_{u0}$, $x_{u1}$, and $x_{r2}$. Two syntactic
+occurrences of the bounded Release share $x_{r2}$ because the clock key is
+the primitive formula.
+
+When a $q$ transition enters accepting location~5, the automaton permits only
+$p$ or $q$ until $x_{r2}>3$, after which location~2 accepts every event. The
+bounded Release obligation can therefore remain pending after the Until
+witness. Two $q$ transitions testing $x_{r2}>3$ are unsatisfiable: at
+location~4, entry resets both relevant clocks; at location~3, entry resets
+$x_{r2}$ and preserves $x_{u1}$ with $x_{r2}\le x_{u1}\le2$. The verified
+passes compare clock bounds with constants and do not track this clock-order
+relation, so the transitions remain in the optimized drawing. They cannot be
+taken. Export produces seven locations and 29 transitions.
+
+\begin{figure*}[!t]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/fig_ex2_disj}}
+\caption{Optimized automaton for
+$\Diamond_{\le5}((\Box_{\le3}(p\lor q))\,\mathsf U_{\le2}\,q)$ before
+disjunctive-invariant elimination. Clocks $x_{u0}$, $x_{u1}$, and $x_{r2}$
+belong to the three distinct primitive timed subformulas. The diagram is
+after the initial \texttt{\_init\_} transition; guards implied by source
+invariants are omitted. A comma-separated event list denotes separate
+transitions. The $q$-edges from locations~4 and~3 with $x_{r2}>3$ are
+unsatisfiable for the reasons given in the text.}
+\label{fig:ex2-disj}
+\end{figure*}
+
+\subsubsection{Optimization and export of the F11 automaton}
+The F11 automaton for
+$ (\Diamond_{\le5}p)\land(\Box_{<2}\neg p) $ illustrates the interaction
+between the generic passes. Spot returns five states and eleven transitions.
+After one optimization round, contradictory action cubes have been removed,
+making location~2 unreachable; dead resets are removed, and clocks $x$ and
+$y$ are merged because every transition resets them synchronously. The
+second round removes the now-dead resets of $y$. The final UPPAAL-oriented
+automaton has four locations, seven transitions, one clock, and two location
+invariants. Figure~\ref{fig:running-pipeline} shows the state after the first
+round and the exported form. This example concerns the optimizer and export;
+its temporal translation is handled separately.
+
+\begin{figure*}[!t]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/fig_step6}}
+\caption{F11 after one optimization round and after UPPAAL-oriented export.
+The first panel shows the removed unreachable location and the two
+synchronously reset clocks; the final panel shows the merged clock and
+synthesized invariants. Edges use the form ``guard, action / resets,'' and the
+double circle marks the accepting location.}
+\label{fig:running-pipeline}
+\end{figure*}

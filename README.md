@@ -18,7 +18,7 @@ On Windows PowerShell, run from this directory:
 .\build.ps1
 ```
 
-The script runs BibTeX and the necessary LaTeX passes in cross-reference order, then reports and enforces the 20-page limit for the main PDF when `pdfinfo` is available. The article target is at most 20 pages including references; the supplementary PDF is separate. The local preambles use the IEEE Access Pantone blue's CMYK alternate so the class renders consistently in PDF viewers that do not support spot colors. `reproduce.sh` remains the separate Linux/WSL evaluation script.
+The script runs BibTeX and the necessary LaTeX passes in cross-reference order, then reports and enforces the 20-page limit for the main PDF when `pdfinfo` is available. The article target is at most 20 pages including references; the supplementary PDF is separate. The local `ieeeaccess.cls` retains the IEEE Access header, logo, and page numbering, uses the Pantone 3015C CMYK alternate for portable PDF rendering, omits the DOI caption when no DOI is assigned, and suppresses the unassigned volume/year footer. `reproduce.sh` remains the separate Linux/WSL evaluation script.
 
 ## Repository layout
 

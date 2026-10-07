@@ -270,17 +270,13 @@
 \headsep 0.25in
 \advance\headsep by 2.8mm
 
-%Defining Pantone SpotColor for blue
-\RequirePackage{color}
+%Defining Access blue with the Pantone 3015C CMYK alternate for portable PDF output
+\RequirePackage{xcolor}
 \ifjtehm
   \definecolor{accessblue}{cmyk}{.24,1,1,0}
   \definecolor{greycolor}{cmyk}{0,0,0,1}
 \else
-  \RequirePackage{spotcolor}
-  \NewSpotColorSpace{PANTONE}
-  \AddSpotColor{PANTONE} {PANTONE3015C} {PANTONE\SpotSpace 3015\SpotSpace C} {1 0.3 0 0.2}
-  \SetPageColorSpace{PANTONE}%
-  \definecolor{accessblue}{spotcolor}{PANTONE3015C,1.0}%
+  \definecolor{accessblue}{cmyk}{1,0.3,0,0.2}
   \definecolor{greycolor}{cmyk}{0,0,0,.8}
 \fi
 \definecolor{grey}{cmyk}{0,0,0,.1}
@@ -522,14 +518,12 @@
        \hfill{\raisebox{5pt}{{\titlepageheaderfont\color{accessblue}\headName}}}%
        \vspace*{-3.5mm}\par\mbox{}\hfill\rule{30.54pc}{.3pt}}}
      \def\@oddfoot{\raisebox{3pt}{%%
-       \hbox to 0pc{\hbox to \textwidth{{\footervolfont VOLUME\ \thevol, \theyear}\hfill\mbox{}}}%
        \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont\@pubid}\hfill\mbox{}}}%
        \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footerpagefont\@artnum}}}%\hspace*{1.8pc}
        }}
      \def\@evenfoot{\raisebox{3pt}{%
        \hbox to 0pc{\hbox to \textwidth{{\footerpagefont\@artnum}}\hfill\mbox{}}\hspace*{1.8pc}%\hspace*{-1.8pc}
        \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont\@pubid}\hfill\mbox{}}}%
-       \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont VOLUME\ \thevol, \theyear}}}%
      }}
   }
 % normal page
@@ -541,12 +535,10 @@
        \headerlogo\hfill{\raisebox{5pt}{\headerfont\leftmark}}\vspace*{-3.55mm}\par%
        \mbox{}\hfill\rule{30.54pc}{.3pt}}}
      \def\@oddfoot{\raisebox{8pt}{%
-       \hbox to 0pc{\hbox to \textwidth{{\footervolfont VOLUME\ \thevol, \theyear}\hfill\mbox{}}}%
        \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footerpagefont\@artnum}}}%\hspace*{1.8pc}
        }}
      \def\@evenfoot{\raisebox{8pt}{%
        \hbox to 0pc{\hbox to \textwidth{{\footerpagefont\@artnum}\mbox{}\hfill}}%\hspace*{1.8pc}%\hspace*{-1.8pc}
-       \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont VOLUME\ \thevol, \theyear}}}%
      }}
   }
 \else
@@ -556,14 +548,12 @@
     \def\@oddhead{\parbox[t]{\textwidth}{\mbox{}\\[-6.3mm]\mbox{}\nheaderfont\color{accessblue}\headName\hfill\headerlogo{\raisebox{-2pt}{\,}}\color{black}\vspace*{-1.5mm}\par\hrulefill}}
     \def\@evenhead{\parbox[t]{\textwidth}{\mbox{}\\[-6.3mm]\mbox{}\headerlogo\hfill\nheaderfont\color{accessblue}\headName{\raisebox{-2pt}{\,}}\color{black}\vspace*{-1.5mm}\par\hrulefill}}
      \def\@oddfoot{\raisebox{3pt}{%%
-       \hbox to 0pc{\hbox to \textwidth{{\footervolfont VOLUME\ \thevol, \theyear}\hfill\mbox{}}}%
        \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont\@pubid}\hfill\mbox{}}}%
        \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footerpagefont\thepage}}}%\hspace*{1.8pc}
        }}
      \def\@evenfoot{\raisebox{3pt}{%
        \hbox to 0pc{\hbox to \textwidth{{\footerpagefont\thepage}\hfill}\mbox{}}\hspace*{1.8pc}%\hspace*{1.8pc}
        \hspace*{-1.8pc}\hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont\@pubid}\hfill\mbox{}}}%
-       \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont VOLUME\ \thevol, \theyear}}}\hspace*{1.8pc}% [updated here]
      }}
   }
 % normal page
@@ -571,12 +561,10 @@
      \def\@oddhead{\parbox[t]{\textwidth}{\mbox{}\\[-6.3mm]{\raisebox{-2pt}{\headerfont\rightmark}}\hfill\headerlogoall\mbox{}\vspace*{-1.5mm}\par\hrulefill}}
      \def\@evenhead{\parbox[t]{\textwidth}{\mbox{}\\[-6.3mm]\mbox{}\headerlogoall\hfill{\raisebox{-2pt}{\headerfont\leftmark}}\vspace*{-1.5mm}\par\hrulefill}}
      \def\@oddfoot{\raisebox{8pt}{%
-       \hbox to 0pc{\hbox to \textwidth{{\footervolfont VOLUME\ \thevol, \theyear}\hfill\mbox{}}}%
        \hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footerpagefont\thepage}}}%\hspace*{1.8pc}
        }}
      \def\@evenfoot{\raisebox{8pt}{%
        \hbox to 0pc{\hbox to \textwidth{{\footerpagefont\thepage}\mbox{}\hfill}}\hspace*{1.8pc}%\hspace*{-1.8pc}
-       \hspace*{-1.8pc}\hbox to 0pc{\hbox to \textwidth{\mbox{}\hfill{\footervolfont VOLUME\ \thevol, \theyear}}}\hspace*{1.8pc}% [updated here]
      }}
   }
 \fi
@@ -601,6 +589,11 @@
 \def\history#1{\gdef\@history{#1}}\let\@history\@empty%
 \def\artnum#1{\gdef\@artnum{#1}}
 \def\doi#1{\gdef\@doi{#1}}
+\let\@doi\@empty
+\def\@doifield#1{%
+  \ifx\@doi\@empty\else
+    {\vss\doifont Digital Object Identifier\space\@doi\vss}\vspace*{#1}\par%
+  \fi}
 \def\title#1{\gdef\@title{#1}}
 \def\authorrefmark#1{\textsuperscript{#1}}
 \def\corresp#1{\gdef\@corresp{#1}}\let\@corresp\@empty%
@@ -697,7 +690,7 @@
      \begin{tabular*}{\textwidth}{@{}p{2.96pc}@{}p{\titlewidth}@{}p{3.15pc}@{}}%
      &\begin{center}\vspace*{1.2mm}\vspace*{-1.21pc}\centering%
      {\vss\historyfont\@history\vss}\vspace*{2mm}\par%
-     {\vss\doifont Digital Object Identifier\space\@doi\vss}\vspace*{7.4mm}\par%
+     \@doifield{7.4mm}%
      {\vss\color{accessblue}\titlefont\@title\vss}\vspace*{6mm}\par%
      \ifjtehmeditorial\else{\vss\authorfont\@author\vss}\vspace*{1mm}\par%
        \@tempdima=\absht%\the\ht99%
@@ -735,7 +728,7 @@
      \begin{minipage}{\titlewidth}%
      \raggedright\vspace*{1.2mm}%
      \ifaccesseditors\else{\vss\historyfont\@history\vss}\vspace*{2mm}\par\fi%
-     {\vss\doifont Digital Object Identifier\space\@doi\vss}\vspace*{7.4mm}\par%
+     \@doifield{7.4mm}%
      {\vss\color{accessblue}\titlefont\@title\vss}\vspace*{6mm}\par%
      \ifaccesseditors\vspace*{2mm}\else{\vss\authorfont\@author\vss}\vspace*{0mm}\par%
 %       \@tempdima=\absht%\the\ht99%
@@ -772,7 +765,7 @@
 %     \setbox\maketitlebox\hbox\bgroup%
      \noindent\begin{minipage}[b]{\titlewidth}%\vspace*{0mm}%
      \raggedright%\vspace*{1.2mm}%
-     {\vss\doifont Digital Object Identifier\space\@doi\vss}\vspace*{4mm}\par%
+     \@doifield{4mm}%
      {\vss\color{accessblue}\titlefont\@title\vss}\vspace*{6mm}\par%
      \end{minipage}\par%
 %     \egroup%

@@ -56,10 +56,10 @@
 \address[2]{IRIT, UPS, Universit\'e de Toulouse, France (e-mail: bodeveix@irit.fr)}
 
 \begin{abstract}
-Timed B\"uchi automata (TBAs) produced by translators or supplied by other tools can contain redundant timing constraints, resets, transitions, clocks, and states, and may use disjunctive invariants that are unsuitable for direct UPPAAL export. We present a Coq-verified pipeline that synthesizes location invariants, propagates timing bounds, removes infeasible transitions and dead resets, merges synchronously reset clocks and equivalent transitions and locations, and converts the result to conjunctive guards and invariants. Every pass preserves the timed-word language of every input TBA under the development's existential initial-clock semantics. In particular, the optimization theorem is generic in the automaton and in the number of rounds; the export theorem composes the verified transformations into a UPPAAL-oriented representation. The transformations are extracted to OCaml and used in \texttt{mtl2tba}. We report measurements on 31 automata generated from a fixed MTL benchmark, plus UPPAAL case studies. The data show large transition reductions on several inputs, while export can increase the edge count when it removes disjunctive invariants. These experiments evaluate the end-to-end tool on the benchmark automata; they do not measure a broad corpus of arbitrary TBAs.
+Timed B\"uchi automata (TBAs) produced by translators or supplied by other tools can contain redundant timing constraints, resets, transitions, clocks, and states, and may use disjunctive invariants that are unsuitable for direct UPPAAL export. We present a pipeline mechanically verified in Rocq (formerly Coq) that synthesizes location invariants, propagates timing bounds, removes infeasible transitions and dead resets, merges synchronously reset clocks and equivalent transitions and locations, and converts the result to conjunctive guards and invariants. Every pass preserves the timed-word language of every input TBA under the development's existential initial-clock semantics. In particular, the optimization theorem is generic in the automaton and in the number of rounds; the export theorem composes the verified transformations into a UPPAAL-oriented representation. The transformations are extracted to OCaml and used in \texttt{mtl2tba}. We report measurements on 31 automata generated from a fixed Metric Temporal Logic (MTL) benchmark, plus UPPAAL case studies. The data show large transition reductions on several inputs, while export can increase the edge count when it removes disjunctive invariants. These experiments evaluate the end-to-end tool on the benchmark automata; they do not measure a broad corpus of arbitrary TBAs.
 \end{abstract}
 \begin{keywords}
-Coq, formal verification, program extraction, timed automata, timed B\"uchi automata, UPPAAL, verified optimization.
+Rocq/Coq, formal verification, program extraction, timed automata, timed B\"uchi automata, UPPAAL, verified optimization.
 \end{keywords}
 \titlepgskip=-15pt
 \maketitle
@@ -83,16 +83,16 @@ The contributions are:
   \item an extracted implementation and an explicit account of its interface and trust boundaries; and
   \item a reproducible evaluation on the tracked 31-configuration benchmark and four system-model case studies, with results and limitations reported from repository data.
 \end{itemize}
-This paper treats the TBA optimization/export layer. Correctness of any upstream logic-to-automaton translation remains a separate contract. Our proofs do not assume that an input automaton came from MTL, Spot, or this tool.
+The integrated tool reuses the same shared-clock Rocq MTL-to-TBA translation proof presented in the companion TSE manuscript as its upstream construction. This translation proof is a prerequisite and is not a new contribution of this paper. The new formal results here begin with generic TBA optimization and export, and apply to every TBA passed to the verified post-processing functions. End-to-end MTL correctness additionally composes with the upstream translation result and its LTL-to-Buchi backend contract.
 
 \section{Timed Automata and the Preservation Contract}
 \label{sec:model}
 \subsection{Timed words and TBAs}
-A timed word is an infinite sequence $w=(a_i,t_i)_{i\in\Nat}$, where $a_i$ is an event from a finite alphabet $\Sigma$, timestamps are strictly increasing, and time diverges: $\lim_{i\to\infty}t_i=+\infty$. Let $t_{-1}=0$ and $\delta_i=t_i-t_{i-1}$. A clock valuation maps a finite clock set $X$ to $\Real_{\ge0}$. Guards are finite conjunctions of event literals and clock comparisons $x\bowtie c$ for $\bowtie\in\{<,\le,=,\ge,>\}$; transitions also carry a set of clocks to reset.
+A timed word is an infinite sequence $w=(a_i,t_i)_{i\in\Nat}$, where $a_i$ is an event from a finite alphabet $\Sigma$, timestamps are strictly increasing, and time diverges: $\lim_{i\to\infty}t_i=+\infty$. For each position $i$, let $\delta_i=t_{i+1}-t_i$ be the time from event $i$ to the next event. A clock valuation maps a finite clock set $X$ to $\Real_{\ge0}$. Guards are finite conjunctions of event literals and clock comparisons $x\bowtie c$ for $\bowtie\in\{<,\le,=,\ge,>\}$; transitions also carry a set of clocks to reset.
 
 A TBA is a tuple $\mathcal A=(L,\ell_0,X,E,\mathit{Acc})$, where $L$ is a finite location set, $\ell_0$ is the initial location, $X$ is the clock set, $E$ is a finite set of transitions $(\ell,\alpha,g,Z,\ell')$, $\alpha$ is an event condition, $g$ is a clock guard, $Z\subseteq X$ is a reset set, and $\mathit{Acc}\subseteq L$ is the set of B\"uchi-accepting locations. The starting automata in the verified optimization are represented without location invariants; synthesis adds them as a separate annotation. Exported invariants are conjunctions of upper bounds.
 
-The Coq development interprets transitions over an extended timed word that records clock values and reset decisions. For each clock $x$, values remain nonnegative and evolve according to
+The Coq development interprets transitions over an extended timed word that records clock values and reset decisions. Here $v_i$ is the clock valuation at event $i$, and $Z_i$ records the clocks reset by the transition on that event. Since a reset occurs at $t_i$, the next-event valuation includes the elapsed interval $\delta_i$:
 \[
 v_{i+1}(x)=
 \begin{cases}
@@ -244,7 +244,7 @@ The complete construction and proof of the invariant split, including its entry-
 \subsection{Implementation and proof boundary}
 The OCaml module \texttt{optim.ml} is extracted from Coq. It implements the invariant and optimization functions, export passes, initialization check used by the upstream MTL workflow, and symbolic grouping. The surrounding \texttt{mtl2tba} executable contains a hand-written parser, calls Spot when building its upstream automaton, reads the returned LBTT automaton, drives the optimization loop, and prints UPPAAL XML and Graphviz DOT. In generic use, the verified functions operate on their Coq TBA type; a parser or converter for a third-party TBA format is an additional trusted interface unless verified separately.
 
-Pass theorems are independent of the source of their TBA. End-to-end correctness for an MTL formula additionally composes with the upstream translation and its LTL-to-B\"uchi contract. The Spot call, parser, LBTT reader, driver, and XML/DOT printers are outside the Coq pass proofs. The floating-point realization of extracted real-number operations is also trusted; the tool restricts bounds to integers in $[0,2^{30}]$, for which inspected arithmetic is exact in the target representation. The repository records Rocq 9.0.1, OCaml 5.4.0, Spot 2.16, and UPPAAL 5.0.0 for the build and case-study artifacts.
+Pass theorems are independent of the source of their TBA. End-to-end correctness for an MTL formula additionally composes with the upstream translation and its linear temporal logic (LTL)-to-B\"uchi contract. The Spot call, parser, LBTT reader, driver, and XML/DOT printers are outside the Coq pass proofs. The floating-point realization of extracted real-number operations is also trusted; the tool restricts bounds to integers in $[0,2^{30}]$, for which inspected arithmetic is exact in the target representation. The repository records Rocq 9.0.1, OCaml 5.4.0, Spot 2.16, and UPPAAL 5.0.0 for the build and case-study artifacts.
 
 The project-wide axiom \texttt{LTL\_TO\_BUCHI\_CORRECT} states the assumed
 correctness of the upstream LTL-to-B\"uchi backend. It is used by the
@@ -364,7 +364,7 @@ generic Coq optimization or export theorem. The case-study models below
 report the model checks and diagnostic traces for the four packaged systems.
 
 \subsection{Availability}
-This project contains proof sources, extracted implementation, benchmark tables and raw data, reproduction scripts, and UPPAAL case-study models, together with the LaTeX source and build instructions. The invariant, optimization, and export formalization files contain the generic pass results; their theorem names are listed in Table~\ref{tab:post-passes}. The project repository is at \url{https://github.com/efares1/verified-tba-optimization-uppaal}.
+This project contains proof sources, extracted implementation, benchmark tables and raw data, reproduction scripts, and UPPAAL case-study models, together with the LaTeX source and build instructions. The authors' earlier mtl2tba v1.10 tool and proof artifacts document the integrated MTL-to-TBA workflow~\cite{mtl2b_tool,mtl2b_proof}; this article focuses on its generic TBA-level optimization and export contracts. The invariant, optimization, and export formalization files contain the generic pass results; their theorem names are listed in Table~\ref{tab:post-passes}. The project repository is at \url{https://github.com/efares1/verified-tba-optimization-uppaal}.
 
 \subsection{Build and artifact layout}
 The verified functions are defined under \texttt{proof/} and extracted into
@@ -410,15 +410,16 @@ such constants, their differences, or their negations. These values are
 exactly representable by the 53-bit significand of a double, and the printed
 constants fit UPPAAL's 32-bit integer domain. This arithmetic argument is
 based on inspection of the extracted implementation rather than a theorem
-about OCaml or the printer. Rational constants can be handled by scaling time
-before invoking the tool.
+about OCaml or the printer. Rational constants can be handled by a common time
+scaling only when every scaled bound remains an integer in $[0,2^{30}]$; timing
+constants in any surrounding system model must be scaled by the same factor.
 
 \section{Evaluation}
 \label{sec:evaluation}
 \subsection{Questions and setup}
-The evaluation addresses three questions: (1) what structural changes do optimization and export make on the current tool's benchmark automata; (2) how does the pipeline scale on conjunctions of bounded responses and nested bounded eventualities; and (3) do the output models support the included UPPAAL and timed-language checks? These are artifact and benchmark questions. The correctness theorems are universal in the input TBA, but measured inputs come from the current MTL-to-TBA workflow.
+The evaluation addresses three questions: (1) what structural changes do optimization and export make on the current tool's benchmark automata; (2) how does the pipeline scale on conjunctions of bounded responses and nested bounded eventualities; and (3) do the output models support the included UPPAAL and timed-language checks? These are artifact and benchmark questions. The evaluation does not compare downstream checker runtime or memory before and after preprocessing; the measured benefit is verified normalization, output compatibility, and the structural changes reported below. The correctness theorems are universal in the input TBA, but measured inputs come from the current MTL-to-TBA workflow.
 
-The tracked benchmark contains 31 configurations: requirement patterns F1--F14 and F3b; R$n$, which conjoins $n$ bounded responses for $1\le n\le8$; and N$n$, a nested bounded-eventuality family for $1\le n\le8$. Each chain was run five times with a 300-second limit. Total and stage times are medians; full structural rows, run ranges, memory, and back-end comparisons appear in Tables~\ref{tab:evaluation} and~\ref{tab:scaling}; exact formulas are in Table~\ref{tab:formulas}. Runs used Ubuntu 26.04 under WSL 2 on an Intel Core i7-8650U at 1.9 GHz with 11.7 GB memory, Rocq/Coq 9.0.1, OCaml 5.4.0, and Spot 2.16. UPPAAL case studies used version 5.0.0. CASAAL ran natively on Windows on the same machine, so timing comparisons across operating systems are indicative only.
+The tracked benchmark contains 31 configurations: requirement patterns F1--F14 and F3b; R$n$, which conjoins $n$ bounded responses for $1\le n\le8$; and N$n$, a nested bounded-eventuality family for $1\le n\le8$. The evaluation script attempts each configuration up to five times with a 300-second limit and stops after the first failed run. Successful configurations have five runs; R7 and R8 each have one timeout attempt. Reported stage and total times are medians of the successful runs. Full structural rows, run ranges, memory, and back-end comparisons appear in Tables~\ref{tab:evaluation} and~\ref{tab:scaling}; exact formulas are in Table~\ref{tab:formulas}. Runs used Ubuntu 26.04 under WSL 2 on an Intel Core i7-8650U at 1.9 GHz with 11.7 GB memory, Rocq 9.0.1, OCaml 5.4.0, and Spot 2.16. CASAAL, an MTL-to-timed-B\"uchi translator~\cite{casaal_tool}, ran natively on Windows on the same machine, so timing comparisons across operating systems are indicative only. UPPAAL case studies used version 5.0.0.
 
 Table~\ref{tab:evaluation} gives the complete structural and timing results for all 31 configurations; exact input formulas are listed in Table~\ref{tab:formulas}.
 \input{evaluation/results_table}
@@ -618,13 +619,13 @@ TBA corpora are the next steps needed to turn the generic result into a
 measured reusable tool for other automaton producers.
 
 \subsection{Threats to validity}
-The benchmark is fixed, hand-selected, and generated through one MTL-based toolchain; it contains no industrial specification and is not a broad arbitrary-TBA suite. R7/R8 time out, and output sizes are sensitive to Spot version and options. The CASAAL language comparison is limited by operator coverage, common-domain encoding, product-checker limits, and an unverified conversion script. The tools ran under different operating systems. The case study consists of four small parameterized models. These limitations concern empirical generality; they do not narrow the universal quantification of the Coq preservation theorems.
+The benchmark is fixed, hand-selected, and generated through one MTL-based toolchain; it contains no industrial specification and is not a broad arbitrary-TBA suite. R7/R8 time out, and output sizes are sensitive to Spot version and options. The CASAAL language comparison is limited by operator coverage, common-domain encoding, product-checker limits, and an unverified conversion script. The checked-in results do not identify the exact CASAAL executable or checksum; \texttt{evaluation/run\_casaal.py} now writes a SHA-256 manifest for the supplied executable and DLLs on future runs, but the version still needs to be recorded. Although \texttt{evaluation/machine.txt} records the versions used for the article, \texttt{evaluation/setup\_wsl.sh} installs from mutable Ubuntu and Spot repositories and does not pin those versions. The tools ran under different operating systems. The case study consists of four small parameterized models. These limitations concern empirical generality; they do not narrow the universal quantification of the Coq preservation theorems.
 
 \section{Related Work}
 \label{sec:related}
 The work relates to semantics-preserving simplification of timed automata, disjunctive invariants in UPPAAL, and mechanically verified automata software.
 
-Bodeveix and Filali studied disjunctive invariants in UPPAAL and their elimination by automaton restructuring~\cite{[BF03]}; Bodeveix, Graf, and Filali considered verification with timed automata and invariant handling~\cite{[BGD04]}. Our export uses location copies and entry conditions that select a copy with a maximal admissible delay, and proves the split preserves timed-word language. Optimization also covers bound propagation, reset removal, and merging for arbitrary TBA inputs.
+For invariant synthesis and pruning, Badban, Leue, and Smaus present the CIPM algorithm, which derives location invariants from constraints on incoming transitions and removes idle transitions~\cite{badban_etal_wing2010}. They also mention location splitting for disjunctive invariants as a possible direction. We instead synthesize upper bounds from outgoing guards and propagate successor requirements backward; our proof covers timed-word language preservation for arbitrary TBAs and every finite number of optimization rounds. For clock reduction, Daws and Yovine detect active clocks and clocks that remain equal~\cite{daws_yovine_rtss1996}. Our passes remove reset commands that cannot affect future guards and merge clocks only under synchronous-reset equivalence. The NWPT 2003 contribution by Bodeveix and Filali is listed as a work on disjunctive invariants in UPPAAL~\cite{[BF03]}; the specific result established here is a split with maximal-delay entry conditions and a proof of timed-word language preservation. Behrmann, David, and Larsen's UPPAAL tutorial provides background on the target tool~\cite{[BGD04]}.
 
 The split addresses a specific semantic issue in adapting disjunctive
 invariants to a target that accepts only conjunctions. Choosing any true
@@ -632,14 +633,14 @@ disjunct on entry is insufficient: that choice can impose a shorter residence
 time than another disjunct and remove a timed word. The entry condition in
 Section~\ref{subsec:disjunctive-invariants} compares the delays admitted by
 the candidate and competing invariants, and the proof reconstructs a split
-run by selecting a copy that admits a maximal delay. This argument is
-complementary to the preceding invariant-synthesis work: the latter derives
-upper bounds from outgoing guards, whereas the split theorem handles the
-disjunctions that arise when guards are merged for export.
+run by selecting a copy that admits a maximal delay. The split complements
+our invariant-synthesis pass, which derives upper bounds from outgoing guards;
+the split theorem handles the disjunctions that arise when guards are merged
+for export.
 
-Timed automata and their language semantics have a broad verification literature; standard treatments include timed B\"uchi automata and timed words~\cite{[TS09]}. UPPAAL and TChecker provide analysis engines, while this work addresses a verified normalization and export layer before analysis. TChecker is used as an external emptiness checker for selected comparisons and a liveness task, not as part of the Coq proof~\cite{tchecker}.
+Tripakis studies emptiness checking for timed B\"uchi automata on simulation graphs~\cite{[TS09]}. UPPAAL and TChecker provide analysis engines, while this work addresses a verified normalization and export layer before analysis. TChecker is used as an external emptiness checker for selected comparisons and a liveness task, not as part of the Coq proof~\cite{tchecker}.
 
-Mechanized automata verification includes verified LTL-to-B\"uchi translation and model checking in Isabelle/HOL, including CAVA~\cite{schimpf_tphols09,cava_cav13}, and verified timed-automata model checking in Munta~\cite{munta_tacas18,munta_formats19}. Those tools address upstream translation or downstream checking. Our transformations can be composed with a correct upstream construction; a verified checker can consume the exported automaton, provided a representation and proof bridge is supplied. The extraction mechanism for the OCaml implementation is described by Letouzey~\cite{letouzey_extraction}.
+Mechanized automata verification includes verified LTL-to-B\"uchi translation and model checking in Isabelle/HOL, including CAVA~\cite{schimpf_tphols09,cava_cav13}, and verified timed-automata model checking in Munta~\cite{munta_tacas18,munta_formats19}. Those tools address upstream translation or downstream checking rather than the same transformation task. The present proofs are stated at a TBA interface; using the output with another checker still requires a format and semantics bridge. The extraction mechanism for the OCaml implementation is described by Letouzey~\cite{letouzey_extraction}.
 This separation also clarifies the role of the experiments. TChecker and
 UPPAAL are downstream consumers used to exercise selected exported models;
 their verdicts do not establish the Coq preservation results. Conversely, the

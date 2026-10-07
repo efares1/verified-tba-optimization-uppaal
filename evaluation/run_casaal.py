@@ -4,14 +4,15 @@ and clocks of the produced timed Buchi automaton (dot output).
 Usage (Windows, from this folder):
     python run_casaal.py [--exclusive] [--runs=N] [path-to-casaal-folder]
 (--runs=N: time is the median of N runs, wall-clock, including the start of the process)
-Writes casaal_results.tsv, or casaal_exclusive.tsv with --exclusive: the
-formula is then conjoined with [](!(a /\ b)) for every pair of distinct
-propositions a, b of the formula, so that CASAAL, which reads sets of
-propositions, is restricted to at most one proposition per position, the
-event semantics of mtl2tba (positions where no proposition holds play the
-role of the event "other").
+Writes casaal_results.tsv, or casaal_exclusive.tsv with --exclusive, plus a
+SHA-256 manifest for the supplied executable and DLL files. Record the tool
+version separately. With --exclusive, the formula is conjoined with
+[](!(a /\ b)) for every pair of distinct propositions a, b of the formula,
+so that CASAAL, which reads sets of propositions, is restricted to at most
+one proposition per position, the event semantics of mtl2tba (positions
+where no proposition holds play the role of the event "other").
 """
-import itertools, os, re, shutil, subprocess, sys, tempfile, time
+import hashlib, itertools, os, re, shutil, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
@@ -41,10 +42,33 @@ def count(dot):
     return len(nodes), len(edges), len(clocks)
 
 
+def write_binary_manifest(casaal_dir, manifest_name):
+    files = sorted((f for f in os.listdir(casaal_dir)
+                    if (f.lower().endswith(('.exe', '.dll')) and
+                        os.path.isfile(os.path.join(casaal_dir, f)))),
+                   key=str.lower)
+    with open(os.path.join(HERE, manifest_name), 'w', encoding='utf-8',
+              newline='\n') as manifest:
+        manifest.write('# SHA-256 identity of supplied CASAAL binaries; '
+                       'version metadata is not inferred.\n')
+        for name in files:
+            path = os.path.join(casaal_dir, name)
+            digest = hashlib.sha256()
+            with open(path, 'rb') as binary:
+                for block in iter(lambda: binary.read(1024 * 1024), b''):
+                    digest.update(block)
+            manifest.write(f'{name}\t{os.path.getsize(path)}\t'
+                           f'{digest.hexdigest()}\n')
+
+
 def main():
+    manifest_name = ('casaal_manifest_exclusive.txt' if EXCLUSIVE
+                     else 'casaal_manifest.txt')
+    write_binary_manifest(CASAAL_DIR, manifest_name)
     work = tempfile.mkdtemp()
     for f in os.listdir(CASAAL_DIR):
-        if f.endswith('.exe') or f.endswith('.dll'):
+        if (f.lower().endswith(('.exe', '.dll')) and
+                os.path.isfile(os.path.join(CASAAL_DIR, f))):
             shutil.copy(os.path.join(CASAAL_DIR, f), work)
     name = 'casaal_exclusive.tsv' if EXCLUSIVE else 'casaal_results.tsv'
     out = open(os.path.join(HERE, name), 'w', encoding='utf-8')

@@ -1,4 +1,4 @@
-\subsection{Location Invariants on the Trace Model}
+\subsection{Location invariants on the trace model}
 \label{sec:inv-semantics}
 A location invariant maps every clock $x$ either to an upper bound
 $M\in\mathbb R$, standing for the constraint $x\le M$, or to $+\infty$ (no
@@ -15,13 +15,13 @@ the event that ends it (lemma \texttt{inv\_\allowbreak{}during\_\allowbreak{}iff
 For the two-sided invariants of Section~\ref{sec:forward}, a lower bound
 $x\ge m$ must likewise hold during the whole stay, hence at its beginning.
 
-\subsection{Invariant Synthesis and Backward Propagation}
+\subsection{Invariant synthesis and backward propagation}
 \label{sec:uppaal-invariants}\label{sec:main-invariants}
 In the exported timed automaton, upper-bounded guards need invariants so that
 time does not elapse past all useful outgoing transitions.  We compute location
 invariants from outgoing upper bounds and propagate successor requirements
-backward, following the standard timed-automata intuition of propagating
-admissible time domains~\cite{[BGD04]}.
+backward, using location invariants to constrain admissible time elapse as in
+standard UPPAAL models~\cite{[BGD04]}.
 
 \paragraph{Upper bound of a guard.}
 For a conjunctive guard $g$ and a clock $x$, let $\mathit{ub}_x(g)$ be the
@@ -69,7 +69,7 @@ strengthened guards.
 
 \begin{theorem}[Backward propagation]
 \label{thm:propagation}
-For every TBA $\mathcal A$ and every $n\in\mathbb N$, the automaton obtained by
+For every TBA $\mathcal A$ and every $n\in\Nat$, the automaton obtained by
 $n$ propagation steps accepts the same timed words as $\mathcal A$.
 \end{theorem}
 
@@ -90,8 +90,8 @@ Each round of the optimization pipeline of Section~\ref{sec:main-pipeline}
 applies one propagation step.  The tool repeats the rounds until the
 automaton is structurally equal to the previous one, as an OCaml value, or
 until 50 rounds have been performed; the bound guarantees termination, and the
-theorem holds for every number of steps, whether or not a fixpoint is
-reached.  On our benchmarks, the rounds reach a fixpoint after at most five
+theorem holds for every number of steps, whether or not a fixed point is
+reached.  On our benchmarks, the rounds reach a fixed point after at most five
 rounds.
 The invariant computation at one location is summarized in the article's
 Figure~\ref{fig:main-inv-unified}.
@@ -119,7 +119,7 @@ $\ell_2$ requires the tighter bound $x\le1$.
 and actions $a$--$d$.  Edges are labeled ``guard, action / resets'' (the guard
 is omitted when it is $\top$); only the edge $\ell_0\to\ell_1$ resets $x$.  The
 incoming arrow marks the initial location; acceptance plays no role here.  The
-computed fixpoint is $\mathit{Inv}(\ell_1)=\mathit{Inv}(\ell_2)=(x\le2)$.}
+computed fixed point is $\mathit{Inv}(\ell_1)=\mathit{Inv}(\ell_2)=(x\le2)$.}
 \label{fig:inv-example}
 \end{figure}
 
@@ -142,7 +142,7 @@ $x\le2$, so $\mathit{Inv}(\ell_2)(x)=\max(1,2)=2$.
 receives $x\le2$, which it already contains, and the self-loop at $\ell_2$
 receives $x\le2$, which is implied by $x\le1$.  Nothing changes.
 \end{enumerate}
-The fixpoint is $\mathit{Inv}(\ell_0)=\top$ and
+The fixed point is $\mathit{Inv}(\ell_0)=\top$ and
 $\mathit{Inv}(\ell_1)=\mathit{Inv}(\ell_2)=(x\le2)$.  While the automaton
 remains in the cycle $\ell_1\leftrightarrow\ell_2$, the clock $x$ cannot exceed
 $2$, and at every reachable valuation at least one outgoing transition of the
@@ -152,7 +152,7 @@ They make the upper bounds of the property automaton explicit, and
 Theorems~\ref{thm:inv-synthesis} and~\ref{thm:propagation} guarantee that they
 do not change its language.
 
-\subsection{Forward Propagation of Lower Bounds and Simplification}
+\subsection{Forward propagation of lower bounds and simplification}
 \label{sec:forward}\label{sec:main-forward}
 \paragraph{Entry bounds.}
 Dually, for a transition $t=\ell\xrightarrow{g,Z}\ell'$ and a clock $x$, the
@@ -198,7 +198,7 @@ translator treats an action $a$ and the atom $\neg a$ of $\T(f)$ as independent
 propositions; removing them also enables clock merging, since the resets of a
 transition that can never be taken would otherwise prevent it.
 
-\subsection{Dead Resets and Merging of Synchronously Reset Clocks}
+\subsection{Dead resets and merging of synchronously reset clocks}
 \label{sec:dead-merge}\label{sec:main-dead-merge}
 \paragraph{Dead resets.}
 A clock $x$ is \emph{live} at a location $\ell$ if some transition that tests
@@ -235,7 +235,7 @@ so its remaining resets are removed by the dead-reset pass in the next round.
 This verified merging is restricted to synchronously reset clocks; merging
 clocks whose values coincide for other reasons is not covered.
 
-\subsection{Normalization of Guards}
+\subsection{Normalization of guards}
 \label{sec:normalize}
 Backward and forward propagation add constraints to guards.  Every time a
 guard is strengthened, it is \emph{tightened}: a constraint implied by another
@@ -250,7 +250,7 @@ constraints.  The removal of trivial lower bounds relies on the nonnegativity
 of clock values, so the theorem is stated on timed words (Coq:
 \texttt{normalize\_\allowbreak{}accepts}).
 
-\subsection{Merging of Transitions and of Locations}
+\subsection{Merging of transitions and of locations}
 \label{sec:merge-ts}\label{sec:main-merge-ts}
 \paragraph{Transitions.}
 Two transitions with the same source, target, and resets are merged when the
@@ -281,7 +281,7 @@ an accepting location with a non-accepting twin would accept runs that visit onl
 often.
 
 
-\subsection{Transition Merging and Elimination of Disjunctive Invariants}
+\subsection{Transition merging and elimination of disjunctive invariants}
 \label{subsec:disjunctive-invariants}
 
 The export works on a model whose guards are in disjunctive normal form over

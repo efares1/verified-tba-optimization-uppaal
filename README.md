@@ -6,7 +6,7 @@ This standalone repository contains the IEEE Access paper and the complete artif
 
 The main contribution is generic in the input automaton: the Coq pass theorems preserve the timed-word language for every TBA and every number of optimization rounds. The verified pipeline synthesizes and propagates invariants, simplifies constraints, removes infeasible transitions and dead resets, merges synchronously reset clocks and equivalent structure, eliminates disjunctive invariants, and emits conjunctive UPPAAL-oriented models.
 
-The paper's performance measurements use the current `mtl2tba` workflow on 31 fixed MTL-generated benchmark configurations. They are not presented as a broad arbitrary-TBA performance study. The upstream MTL translation and Spot interface are included as tool dependencies and context; their theorem is a separate prerequisite when composing end-to-end correctness.
+The paper's performance measurements use the current `mtl2tba` workflow on 31 fixed MTL-generated benchmark configurations. They are not presented as a broad arbitrary-TBA performance study. The integrated tool reuses the same shared-clock MTL-to-TBA Rocq proof presented in the companion Paper 1 manuscript as its upstream translation; that proof is a prerequisite, not a new contribution of this paper. The distinct results here are the generic TBA optimization and export proofs, extracted implementation, and evaluation. The upstream theorem remains a separate prerequisite when composing end-to-end correctness; the Spot interface is included as tool context.
 
 ## Build the PDFs
 

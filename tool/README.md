@@ -43,7 +43,7 @@ Example:
 | LTL to Buchi automaton | Spot, `ltl2tgba -B --small --lbtt=t` |
 | reading of the Spot automaton (literals kept) | `lbtt_read.ml` |
 | relaxation and reset completion | extracted from Coq (`compile_with`) |
-| optimization, iterated to a fixpoint | extracted from Coq (`optimize`) |
+| optimization, iterated to a fixed point | extracted from Coq (`optimize`) |
 | export: conjunctive guards and invariants | extracted from Coq (`export`) |
 | UPPAAL and dot output | `output.ml` |
 | PDF drawing | Graphviz (`dot -Tpdf`) |

@@ -3,27 +3,27 @@
 \caption{Scalability on the families R$n$ and N$n$: median time of the Spot, optimization, and export stages and of the whole chain, minimum and maximum of the five runs, peak memory, and exported transitions with Spot options \texttt{-B --small} (default) and \texttt{-B -D}.  Times in seconds, memory in MB.  The total also includes the stages not listed: reading of the output of Spot, reset completion, check $\mathsf{init\_free}$, symbolic transitions, and printing.}
 \label{tab:scaling}
 \footnotesize
-\setlength{\tabcolsep}{2.5pt}
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
-Id & Spot & Opt. & Exp. & Total & [min, max] & Mem. & tr & \shortstack{tr\\\texttt{-D}}\\
+Id & Spot & Opt. & Exp. & Total & [min, max] & Mem. & tr & tr \texttt{-D}\\
 \midrule
-R1 & 0.01 & 0.00 & 0.00 & 0.02 & [0.02, 0.05] & 17 & 5 & 5\\
-R2 & 0.01 & 0.00 & 0.00 & 0.03 & [0.02, 0.06] & 17 & 19 & 19\\
-R3 & 0.03 & 0.01 & 0.02 & 0.07 & [0.06, 0.20] & 18 & 67 & 67\\
-R4 & 0.07 & 0.04 & 0.18 & 0.41 & [0.30, 0.49] & 19 & 217 & 217\\
-R5 & 0.48 & 0.68 & 1.12 & 2.90 & [2.61, 3.44] & 23 & 651 & 651\\
-R6 & 6.36 & 16.57 & 10.31 & 36.75 & [36.53, 39.80] & 106 & 1837 & 1837\\
+R1 & 0.01 & 0.00 & 0.00 & 0.02 & [0.02, 0.04] & 17 & 5 & 5\\
+R2 & 0.01 & 0.00 & 0.00 & 0.02 & [0.02, 0.05] & 17 & 19 & 19\\
+R3 & 0.01 & 0.00 & 0.01 & 0.04 & [0.04, 0.06] & 18 & 67 & 67\\
+R4 & 0.05 & 0.04 & 0.11 & 0.25 & [0.24, 0.36] & 19 & 217 & 217\\
+R5 & 0.46 & 0.67 & 1.22 & 2.88 & [2.75, 3.43] & 23 & 651 & 651\\
+R6 & 6.83 & 18.21 & 11.98 & 40.87 & [39.29, 45.75] & 106 & 1837 & 1837\\
 R7 & \multicolumn{8}{c}{timeout (limit 300~s)}\\
 R8 & \multicolumn{8}{c}{timeout (limit 300~s)}\\
 N1 & 0.01 & 0.00 & 0.00 & 0.02 & [0.02, 0.04] & 17 & 5 & 5\\
 N2 & 0.01 & 0.00 & 0.00 & 0.02 & [0.02, 0.04] & 17 & 9 & 26\\
-N3 & 0.01 & 0.00 & 0.00 & 0.03 & [0.03, 0.05] & 18 & 16 & 173\\
-N4 & 0.04 & 0.00 & 0.00 & 0.06 & [0.05, 0.07] & 19 & 25 & 1035\\
-N5 & 0.31 & 0.00 & 0.02 & 0.36 & [0.32, 0.61] & 22 & 36 & 5461\\
-N6 & 1.08 & 0.02 & 0.05 & 1.21 & [1.18, 1.25] & 35 & 49 & timeout\\
-N7 & 10.47 & 0.07 & 0.21 & 10.94 & [9.70, 13.26] & 140 & 64 & timeout\\
-N8 & 101.42 & 0.24 & 0.64 & 103.02 & [101.06, 104.84] & 961 & 81 & timeout\\
+N3 & 0.01 & 0.00 & 0.00 & 0.03 & [0.03, 0.04] & 18 & 16 & 173\\
+N4 & 0.03 & 0.00 & 0.00 & 0.05 & [0.05, 0.07] & 19 & 25 & 1035\\
+N5 & 0.35 & 0.01 & 0.02 & 0.41 & [0.36, 0.47] & 22 & 36 & 5461\\
+N6 & 1.24 & 0.02 & 0.06 & 1.38 & [1.32, 2.83] & 35 & 49 & timeout\\
+N7 & 9.22 & 0.09 & 0.22 & 9.72 & [8.91, 12.03] & 140 & 64 & timeout\\
+N8 & 109.70 & 0.29 & 0.73 & 111.98 & [107.67, 137.38] & 961 & 81 & timeout\\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -7,8 +7,9 @@
   (`~` marks a CASAAL encoding that is not equivalent: CASAAL has no hatted
   operators).  R1 is F1 with renamed propositions.
 - `run_full_eval.sh`: builds the tool and runs `mtl2tba -stats` on every
-  formula (Linux/WSL, requires Spot, dune, menhir): five runs per formula
-  (`REPS`), limit 300 s per run (`LIMIT`), peak memory (`/usr/bin/time`),
+  formula (Linux/WSL, requires Spot, dune, menhir): up to `REPS` attempts per
+  formula, stopping after the first non-success; limit 300 s per run (`LIMIT`),
+  peak memory (`/usr/bin/time`),
   times of the Spot, optimization, and export stages, the verified check
   `init_free`, and one run with Spot option `-B --small` instead of `-B -D`.
   Writes `ours_runs.tsv` (every run), `ours_results.tsv` (medians, via
@@ -18,7 +19,10 @@
   `spot_det_noweak.tsv`).
 - `run_casaal.py`: runs CASAAL (Windows executable) on every formula (option
   `--runs=5`: median of five runs, used for the article); writes
-  `casaal_results.tsv`.  With `--exclusive`, the formula is conjoined with
+  `casaal_results.tsv` and the relevant manifest (`casaal_manifest.txt`, or
+  `casaal_manifest_exclusive.txt` with `--exclusive`), which records supplied
+  executable/DLL names, sizes, and SHA-256 hashes. Record the CASAAL version
+  separately. With `--exclusive`, the formula is conjoined with
   `[](!(a /\ b))` for every pair of distinct propositions, so that CASAAL
   reads at most one proposition per position, the event semantics of
   `mtl2tba` (common semantic domain); writes `casaal_exclusive.tsv`.
@@ -81,7 +85,8 @@
     of CASAAL are encoded by committed intermediate locations.  The script is
     not verified.
   - `run_casaal_neg.py`: CASAAL on the negation of every formula
-    (`casaal_out_neg/`; `casaal_out_x/` holds the automata of the formulas).
+    (`casaal_out_neg/`; `casaal_out_x/` holds the automata of the formulas);
+    also writes `casaal_manifest_neg.txt`.
   - `run_tck_equivalence.sh`: for every configuration, the products
     P1 = ours(f) x CASAAL(!f), P2 = CASAAL(f) x ours(!f), and
     S = ours(f) x ours(!f) must be empty, and C = ours(f) x CASAAL(f) must not
@@ -127,4 +132,4 @@
    `python run_casaal.py --exclusive <casaal folder>`
 5. `python make_tables.py`
 
-The machine and the versions used for the article are in `machine.txt`.
+The machine and the versions used for the article are in `machine.txt`. The setup script uses mutable Ubuntu package and Spot repositories, so rerunning it later may install different versions.
